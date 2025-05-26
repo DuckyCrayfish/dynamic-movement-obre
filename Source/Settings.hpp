@@ -140,8 +140,8 @@ class Settings {
             Logger::log<LogLevel::Verbose>(STR("Found config file:\n"));
             Logger::log<LogLevel::Verbose>(to_wstring(filePath) + STR("\n"));
         } else {
-            Logger::log<LogLevel::Verbose>(STR("Found config override:\n"));
-            Logger::log<LogLevel::Verbose>(to_wstring(filePath) + STR("\n"));
+            Logger::log<LogLevel::Normal>(STR("Found config override:\n"));
+            Logger::log<LogLevel::Normal>(to_wstring(filePath) + STR("\n"));
         }
 
         for (const auto &entry : settingEntries_) {
