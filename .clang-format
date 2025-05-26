@@ -1,0 +1,11 @@
+BasedOnStyle: Google
+ColumnLimit: 120
+IndentWidth: 4
+
+MaxEmptyLinesToKeep: 2
+AccessModifierOffset: -2
+AllowShortFunctionsOnASingleLine: Empty
+BinPackArguments: false
+IndentExternBlock: true
+NamespaceIndentation: All
+FixNamespaceComments: false

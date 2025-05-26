@@ -1,0 +1,14 @@
+# IDE
+.vscode/settings.json
+.vscode/compile_commands.json
+.vscode/c_cpp_properties.json
+
+# Build system
+.xmake
+vsxmake2022
+compile_commands.json
+
+# Build artifacts
+Binaries
+Distribution
+Intermediates
