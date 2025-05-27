@@ -125,10 +125,9 @@ class Settings {
                 Logger::log<LogLevel::Warning>(STR("Failed to parse config override file:\n"));
             }
 
-            Logger::log<LogLevel::Warning>(STR("{}\n"), to_wstring(filePath));
-            Logger::log<LogLevel::Warning>(STR("Error: {}\n"), to_wstring(err.description()));
             auto source = to_wstring((std::ostringstream() << err.source().begin).str());
-            Logger::log<LogLevel::Warning>(STR("Occurred at: {}\n"), source);
+            Logger::log<LogLevel::Warning>(STR("{}\n"), to_wstring(filePath));
+            Logger::log<LogLevel::Warning>(STR("Error: {} ({})\n"), to_wstring(err.description()), source);
 
             if (!isOverride) {
                 Logger::log<LogLevel::Warning>(STR("Starting with default values.\n"));
