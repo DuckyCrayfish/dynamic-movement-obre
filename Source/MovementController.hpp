@@ -32,13 +32,6 @@ using namespace ModUtils;
 
 
 class MovementController {
-  private:
-    const float positiveStepScalar;
-    const float negativeStepScalar;
-    float calculateSpeedScalar(const float from, const float to) const {
-        return std::pow(to / from, 1.0f / settings.getSteps());
-    }
-
   protected:
     /// Mod settings.
     const Settings& settings;
@@ -46,6 +39,13 @@ class MovementController {
     float moveRunMult_;
     /// The current run speed athletics multiplier.
     float moveRunAthleticsMult_;
+
+  private:
+    const float positiveStepScalar;
+    const float negativeStepScalar;
+    float calculateSpeedScalar(const float from, const float to) const {
+        return std::pow(to / from, 1.0f / settings.getSteps());
+    }
 
   public:
     MovementController(const Settings& settings_)
