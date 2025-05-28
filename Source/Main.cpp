@@ -61,7 +61,7 @@ class AdvancedMovement : public ModBase {
                 bool isScrollUp = context.GetParams<FInputActionValue>().asFloat() > 0;
                 auto walking = mc.isWalking();
 
-                if (!scrollShouldAdjustMovement()) {
+                if (!shouldScrollAdjustMovement()) {
                     return;
                 }
 
@@ -87,7 +87,7 @@ class AdvancedMovement : public ModBase {
         RegisterModHook(
             STR("/Script/Altar.VEnhancedAltarPlayerController:MouseWheelUpInput"),
             [this]() {
-                if (scrollShouldAdjustMovement()) {
+                if (shouldScrollAdjustMovement()) {
                     cameraController.lockPOV();
                 }
             },
@@ -116,7 +116,7 @@ class AdvancedMovement : public ModBase {
         }
     }
 
-    bool scrollShouldAdjustMovement() {
+    bool shouldScrollAdjustMovement() {
         return !settings.getUseHoldKey() || isKeyPressed(settings.getHoldKey()).value();
     }
 };
