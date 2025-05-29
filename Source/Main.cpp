@@ -106,13 +106,26 @@ class AdvancedMovement : public ModBase {
 
         if (settings.getHoldToSprint()) {
             RegisterModHook(STR("/Script/Altar.VEnhancedAltarPlayerController:MovementForwardInput_Pressed"), [this]() {
-                if (!mc.isSprinting() && mc.isMovingOnGround() && mc.isSprintKeyPressed()) {
-                    mc.toggleSprint();
+                if (!mc.isSprintKeyPressed()) {
+                    return;
+                }
+
+
+                if (getHorse().value()) {
+                    if (!mc.wantsToGallop()) {
+                        mc.toggleGallop();
+                    }
+                } else {
+                    if (!mc.isSprinting() && mc.isMovingOnGround()) {
+                        mc.toggleSprint();
+                    }
                 }
             });
 
-            RegisterModHook(STR("/Script/Altar.VEnhancedAltarPlayerController:ShiftKeyInput_Released"),
-                            [this]() { mc.disableSprintToggle(); });
+            RegisterModHook(STR("/Script/Altar.VEnhancedAltarPlayerController:ShiftKeyInput_Released"), [this]() {
+                mc.disableSprintToggle();
+                mc.disableGallopToggle();
+            });
         }
     }
 

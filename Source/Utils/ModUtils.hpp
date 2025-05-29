@@ -254,4 +254,40 @@ namespace ModUtils {
         return false;
     }
 
+    std::expected<UObject*, StringType> getHorse() {
+        UObject* playerCharacter = getPlayerCharacter().value();
+        auto Function = getFunctionByNameInChain(playerCharacter, STR("GetHorse"));
+        if (!Function) {
+            return std::unexpected(Function.error());
+        }
+        FProperty* ReturnProperty = Function.value()->GetReturnProperty();
+        void* Params = _malloca(Function.value()->GetParmsSize());
+        ReturnProperty->InitializeValue_InContainer(Params);
+
+        playerCharacter->ProcessEvent(Function.value(), Params);
+        FObjectProperty* ReturnObjectProperty = ReturnProperty->ContainerPtrToValuePtr<FObjectProperty>(Params);
+        UObject** value = ReturnProperty->ContainerPtrToValuePtr<UObject*>(ReturnObjectProperty);
+        if (value == nullptr) {
+            return std::unexpected(STR("Return value is null"));
+        }
+        return *value;
+    }
+
+    std::expected<UObject*, StringType> getHorseMovement() {
+        auto horse = getHorse();
+        if (!horse) {
+            return std::unexpected(horse.error());
+        }
+
+        if (horse.value() == nullptr) {
+            return std::unexpected(STR("No horse found."));
+        }
+
+        UObject** characterMovement =
+            horse.value()->GetValuePtrByPropertyNameInChain<UObject*>(STR("CharacterMovement"));
+        if (!characterMovement || !*characterMovement) {
+            return std::unexpected(STR("CharacterMovement not found"));
+        }
+        return *characterMovement;
+    }
 }

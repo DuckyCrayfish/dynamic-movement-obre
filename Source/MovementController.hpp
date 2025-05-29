@@ -186,10 +186,29 @@ class MovementController {
         playerController->ProcessEvent(ToggleSprint, &params);
     }
 
+    bool wantsToGallop() const {
+        UObject* playerController = getPlayerController().value();
+        return callPropositional(playerController, STR("GetWantsToGallop")).value();
+    }
+
+    /// Toggles gallop on and off.
+    void toggleGallop() const {
+        UObject* playerController = getPlayerController().value();
+        UFunction* ToggleGallop = getFunctionByNameInChain(playerController, STR("ToggleGallop")).value();
+        auto params = FInputActionValue::Create(true);
+        playerController->ProcessEvent(ToggleGallop, &params);
+    }
+
     /// Not quite sure what this does exactly but it seems to just disable sprinting.
     void disableSprintToggle() const {
         UObject* playerController = getPlayerController().value();
         UFunction* DisableSprintToggle = getFunctionByNameInChain(playerController, STR("DisableSprintToggle")).value();
         playerController->ProcessEvent(DisableSprintToggle, nullptr);
+    }
+
+    void disableGallopToggle() const {
+        UObject* playerController = getPlayerController().value();
+        UFunction* DisableGallopToggle = getFunctionByNameInChain(playerController, STR("DisableGallopToggle")).value();
+        playerController->ProcessEvent(DisableGallopToggle, nullptr);
     }
 };
