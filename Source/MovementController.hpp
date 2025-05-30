@@ -17,17 +17,14 @@
  * along with Dynamic Movement.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <Mod/CppUserModBase.hpp>
-#include <UnrealDef.hpp>
 #include <algorithm>
-#include <optional>
 
 #include "Settings.hpp"
 #include "Shapes/FInputActionValue.hpp"
 #include "Utils/Logger.hpp"
 #include "Utils/ModUtils.hpp"
+#include "Wrappers/Wrappers.hpp"
 
-using namespace RC::Unreal;
 using namespace ModUtils;
 
 
@@ -117,24 +114,10 @@ class MovementController {
     }
 
     /// Apply the speed values currently stored in this instance to the player.
-    void applySpeed() {
-        auto characterMovement = getCharacterMovement();
-        if (!characterMovement) {
-            return;
-        }
-        auto MoveRunMult = characterMovement.value()->GetValuePtrByPropertyNameInChain<float>(STR("MoveRunMult"));
-        auto MoveRunAthleticsMult =
-            characterMovement.value()->GetValuePtrByPropertyNameInChain<float>(STR("MoveRunAthleticsMult"));
-        if (!MoveRunMult) {
-            Logger::log<LogLevel::Error>(STR("Could not apply speed: null property MoveRunMult\n"));
-            return;
-        }
-        if (!MoveRunAthleticsMult) {
-            Logger::log<LogLevel::Error>(STR("Could not apply speed: null property MoveRunAthleticsMult\n"));
-            return;
-        }
-        *MoveRunMult = moveRunMult_;
-        *MoveRunAthleticsMult = moveRunAthleticsMult_;
+    void applySpeed() const {
+        auto playerMovement = GetPlayerMovement();
+        playerMovement.SetMemberInChain(STR("MoveRunMult"), moveRunMult_);
+        playerMovement.SetMemberInChain(STR("MoveRunAthleticsMult"), moveRunAthleticsMult_);
     }
 
     /// Returns true if the player's current run speed is at the maximum value.
@@ -145,70 +128,5 @@ class MovementController {
     /// Returns true if the player's current run speed is at the minimum value.
     bool isAtMinSpeed() const {
         return moveRunMult_ == settings.getMoveRunMultMin();
-    }
-
-    /// Returns true if the player is walking, false otherwise.
-    bool isWalking() const {
-        UObject* playerController = getPlayerController().value();
-        return callPropositional(playerController, STR("IsWalking")).value();
-    }
-
-    /// Returns true if the character is sprinting, false otherwise.
-    bool isSprinting() const {
-        UObject* characterMovement = getCharacterMovement().value();
-        return callPropositional(characterMovement, STR("IsSprinting")).value();
-    }
-
-    /// Returns true if the character is currently moving on the ground, false otherwise.
-    bool isMovingOnGround() const {
-        UObject* characterMovement = getCharacterMovement().value();
-        return callPropositional(characterMovement, STR("IsMovingOnGround")).value();
-    }
-
-    /// Returns true if the sprint key is currently pressed, false otherwise.
-    bool isSprintKeyPressed() {
-        return isInputActionKeyPressed(STR("IMC_Game_Movement"), STR("IA_Game_Movement_Sprint")).value();
-    }
-
-    /// Toggles between walking and running.
-    void toggleWalk() const {
-        UObject* playerController = getPlayerController().value();
-        UFunction* ToggleWalk = getFunctionByNameInChain(playerController, STR("ToggleWalk")).value();
-        auto params = FInputActionValue::Create(true);
-        playerController->ProcessEvent(ToggleWalk, &params);
-    }
-
-    /// Toggles sprint on and off.
-    void toggleSprint() const {
-        UObject* playerController = getPlayerController().value();
-        UFunction* ToggleSprint = getFunctionByNameInChain(playerController, STR("ToggleSprint")).value();
-        auto params = FInputActionValue::Create(true);
-        playerController->ProcessEvent(ToggleSprint, &params);
-    }
-
-    bool wantsToGallop() const {
-        UObject* playerController = getPlayerController().value();
-        return callPropositional(playerController, STR("GetWantsToGallop")).value();
-    }
-
-    /// Toggles gallop on and off.
-    void toggleGallop() const {
-        UObject* playerController = getPlayerController().value();
-        UFunction* ToggleGallop = getFunctionByNameInChain(playerController, STR("ToggleGallop")).value();
-        auto params = FInputActionValue::Create(true);
-        playerController->ProcessEvent(ToggleGallop, &params);
-    }
-
-    /// Not quite sure what this does exactly but it seems to just disable sprinting.
-    void disableSprintToggle() const {
-        UObject* playerController = getPlayerController().value();
-        UFunction* DisableSprintToggle = getFunctionByNameInChain(playerController, STR("DisableSprintToggle")).value();
-        playerController->ProcessEvent(DisableSprintToggle, nullptr);
-    }
-
-    void disableGallopToggle() const {
-        UObject* playerController = getPlayerController().value();
-        UFunction* DisableGallopToggle = getFunctionByNameInChain(playerController, STR("DisableGallopToggle")).value();
-        playerController->ProcessEvent(DisableGallopToggle, nullptr);
     }
 };

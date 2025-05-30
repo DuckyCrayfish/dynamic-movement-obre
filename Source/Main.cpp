@@ -17,8 +17,6 @@
  * along with Dynamic Movement.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#define MOD_NAME STR("MyAwesomeMod")
-
 #include <Helpers/String.hpp>
 #include <Mod/CppUserModBase.hpp>
 #include <UE4SSProgram.hpp>
@@ -32,6 +30,10 @@
 #include "Shapes/FInputActionValue.hpp"
 #include "Utils/Logger.hpp"
 #include "Utils/ModUtils.hpp"
+
+#ifndef MOD_NAME
+#error "MOD_NAME must be defined."
+#endif
 
 using namespace ModUtils;
 
@@ -58,27 +60,29 @@ class AdvancedMovement : public ModBase {
             STR("/Script/Altar.VEnhancedAltarPlayerController:MouseWheelUpInput"),
             [](FunctionContext&, void*) {},
             [this](FunctionContext& context, void*) {
-                bool isScrollUp = context.GetParams<FInputActionValue>().asFloat() > 0;
-                auto walking = mc.isWalking();
-
                 if (!shouldScrollAdjustMovement()) {
                     return;
                 }
 
+                bool isScrollUp = context.GetParams<FInputActionValue>().asFloat() > 0;
+                auto pc = GetPlayerController();
+                auto pm = GetPlayerMovement();
+                auto walking = pc.IsWalking();
+
                 if (isScrollUp) {
                     if (walking) {
-                        mc.toggleWalk();
+                        pc.ToggleWalk();
                         mc.applyMinSpeed();
                     }
                     mc.incrementSpeed();
                 } else {
-                    if (mc.isSprinting() && settings.getScrollTogglesSprintOff()) {
-                        mc.toggleSprint();
+                    if (pm.IsSprinting() && settings.getScrollTogglesSprintOff()) {
+                        pc.ToggleSprint();
                         mc.applyMaxSpeed();
                     } else {
                         mc.decrementSpeed();
                         if (!walking && mc.isAtMinSpeed() && settings.getMoveRunMultMin() == 1) {
-                            mc.toggleWalk();
+                            pc.ToggleWalk();
                         }
                     }
                 }
@@ -106,31 +110,39 @@ class AdvancedMovement : public ModBase {
 
         if (settings.getHoldToSprint()) {
             RegisterModHook(STR("/Script/Altar.VEnhancedAltarPlayerController:MovementForwardInput_Pressed"), [this]() {
-                if (!mc.isSprintKeyPressed()) {
+                if (!isSprintKeyPressed()) {
                     return;
                 }
 
+                auto pc = GetPlayerController();
+                auto pm = GetPlayerMovement();
 
-                if (getHorse().value()) {
-                    if (!mc.wantsToGallop()) {
-                        mc.toggleGallop();
+                if (pc.IsHorseRiding()) {
+                    if (!pc.GetWantsToGallop()) {
+                        pc.ToggleGallop();
                     }
                 } else {
-                    if (!mc.isSprinting() && mc.isMovingOnGround()) {
-                        mc.toggleSprint();
+                    if (!pm.IsSprinting() && pm.IsMovingOnGround()) {
+                        pc.ToggleSprint();
                     }
                 }
             });
 
             RegisterModHook(STR("/Script/Altar.VEnhancedAltarPlayerController:ShiftKeyInput_Released"), [this]() {
-                mc.disableSprintToggle();
-                mc.disableGallopToggle();
+                GetPlayerController().DisableSprintToggle();
+                GetPlayerController().DisableGallopToggle();
             });
         }
     }
 
+    /// Returns true if scrolling should currently control movement.
     bool shouldScrollAdjustMovement() {
         return !settings.getUseHoldKey() || isKeyPressed(settings.getHoldKey()).value();
+    }
+
+    /// Returns true if the sprint key is currently pressed, false otherwise.
+    bool isSprintKeyPressed() const {
+        return isInputActionKeyPressed(STR("IMC_Game_Movement"), STR("IA_Game_Movement_Sprint"));
     }
 };
 

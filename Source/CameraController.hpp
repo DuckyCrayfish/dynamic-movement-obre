@@ -31,11 +31,11 @@ class CameraController {
   public:
     /// Locks the player's POV, preventing it from being changed on-scroll.
     void lockPOV() {
-        UObject* playerController = ModUtils::getPlayerController().value();
-        bool* bIsPOVChangeLocked = playerController->GetValuePtrByPropertyNameInChain<bool>(STR("bIsPOVChangeLocked"));
+        auto playerController = ModUtils::GetPlayerController();
+        bool* bIsPOVChangeLocked = playerController.GetMember<bool>(STR("bIsPOVChangeLocked"));
         previousValuePOV = *bIsPOVChangeLocked;
-        *bIsPOVChangeLocked = true;
         didLockPOV = true;
+        *bIsPOVChangeLocked = true;
     }
 
     /// Resets the POV lock to its previous state, if it was locked by this controller.
@@ -44,8 +44,6 @@ class CameraController {
             return;
         }
         didLockPOV = false;
-        UObject* playerController = ModUtils::getPlayerController().value();
-        bool* bIsPOVChangeLocked = playerController->GetValuePtrByPropertyNameInChain<bool>(STR("bIsPOVChangeLocked"));
-        *bIsPOVChangeLocked = previousValuePOV;
+        ModUtils::GetPlayerController().SetMember(STR("bIsPOVChangeLocked"), previousValuePOV);
     }
 };
