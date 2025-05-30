@@ -33,35 +33,38 @@
 #error "MOD_NAME must be defined."
 #endif
 
+#define STRINGIFY(x) STR(x)
+#define MOD_NAME_STR STRINGIFY(MOD_NAME)
+
 
 namespace Logger {
     /// Wrapper for `log` that prepends the mod name to the message.
     template <typename... FmtArgs>
     void log(RC::StringViewType content, FmtArgs... fmt_args) {
-        RC::Output::send(std::format(STR("[{}] {}"), MOD_NAME, RC::to_wstring(content)), fmt_args...);
+        RC::Output::send(std::format(STR("[{}] {}"), MOD_NAME_STR, RC::to_wstring(content)), fmt_args...);
     }
 
     /// Wrapper for `log` that prepends the mod name to the message.
     template <RC::Output::EnumType OptionalArg, typename... FmtArgs>
     void log(RC::StringViewType content, OptionalArg optional_arg, FmtArgs... fmt_args) {
-        RC::Output::send<optional_arg>(std::format(STR("[{}] {}"), MOD_NAME, RC::to_wstring(content)), fmt_args...);
+        RC::Output::send<optional_arg>(std::format(STR("[{}] {}"), MOD_NAME_STR, RC::to_wstring(content)), fmt_args...);
     }
 
     /// Wrapper for `log` that prepends the mod name to the message.
     template <RC::Output::EnumType OptionalArg>
     void log(RC::StringViewType content, OptionalArg optional_arg) {
-        RC::Output::send<optional_arg>(std::format(STR("[{}] {}"), MOD_NAME, RC::to_wstring(content)));
+        RC::Output::send<optional_arg>(std::format(STR("[{}] {}"), MOD_NAME_STR, RC::to_wstring(content)));
     }
 
     /// Wrapper for `log` that prepends the mod name to the message.
     template <int32_t optional_arg, typename... FmtArgs>
     void log(RC::StringViewType content, FmtArgs... fmt_args) {
-        RC::Output::send<optional_arg>(std::format(STR("[{}] {}"), MOD_NAME, RC::to_wstring(content)), fmt_args...);
+        RC::Output::send<optional_arg>(std::format(STR("[{}] {}"), MOD_NAME_STR, RC::to_wstring(content)), fmt_args...);
     }
 
     /// Wrapper for `log` that prepends the mod name to the message.
     template <int32_t optional_arg>
     void log(RC::StringViewType content) {
-        RC::Output::send<optional_arg>(std::format(STR("[{}] {}"), MOD_NAME, RC::to_wstring(content)));
+        RC::Output::send<optional_arg>(std::format(STR("[{}] {}"), MOD_NAME_STR, RC::to_wstring(content)));
     }
 }

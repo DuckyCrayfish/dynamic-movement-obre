@@ -12,7 +12,7 @@ target(projectName)
     set_languages("cxx23")
     add_packages("toml++")
     add_files("Source/**.cpp")
-    add_defines("MOD_NAME=L\"MyAwesomeMod\"")
+    add_defines("MOD_NAME=\"" .. projectName .. "\"")
 
 xpack(projectName)
     set_version(projectVersion)

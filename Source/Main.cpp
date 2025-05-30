@@ -35,12 +35,15 @@
 #error "MOD_NAME must be defined."
 #endif
 
+#define STRINGIFY(x) STR(x)
+#define MOD_NAME_STR STRINGIFY(MOD_NAME)
+
 using namespace ModUtils;
 
 
 auto modPath = RC::UE4SSProgram::get_program().get_mods_directory();
-auto configPath = fmt::format(STR(R"({}\{}\config.toml)"), modPath, MOD_NAME);
-auto overrideDirectory = fmt::format(STR(R"({}\{}\ConfigOverrides)"), modPath, MOD_NAME);
+auto configPath = fmt::format(STR(R"({}\{}\config.toml)"), modPath, MOD_NAME_STR);
+auto overrideDirectory = fmt::format(STR(R"({}\{}\ConfigOverrides)"), modPath, MOD_NAME_STR);
 
 class AdvancedMovement : public ModBase {
   public:
@@ -49,7 +52,7 @@ class AdvancedMovement : public ModBase {
     MovementController mc;
 
     AdvancedMovement() : settings(configPath, overrideDirectory), mc(settings) {
-        ModName = MOD_NAME;
+        ModName = MOD_NAME_STR;
         ModVersion = STR("1.0");
         ModDescription = STR("This is my awesome mod");
         ModAuthors = STR("DuckyCrayfish");
