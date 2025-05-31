@@ -32,7 +32,7 @@ class CameraController {
     /// Locks the player's POV, preventing it from being changed on-scroll.
     void lockPOV() {
         auto playerController = ModUtils::GetPlayerController();
-        bool* bIsPOVChangeLocked = playerController.GetMember<bool>(STR("bIsPOVChangeLocked"));
+        bool* bIsPOVChangeLocked = playerController.GetMemberInChain<bool>(STR("bIsPOVChangeLocked"));
         previousValuePOV = *bIsPOVChangeLocked;
         didLockPOV = true;
         *bIsPOVChangeLocked = true;

@@ -41,16 +41,16 @@ class MovementController {
     const float positiveStepScalar;
     const float negativeStepScalar;
     float calculateSpeedScalar(const float from, const float to) const {
-        return std::pow(to / from, 1.0f / settings.getSteps());
+        return std::pow(to / from, 1.0f / settings.steps.get());
     }
 
   public:
     MovementController(const Settings& settings_)
         : settings(settings_),
-          moveRunMult_(settings_.getMoveRunMultMax()),
-          moveRunAthleticsMult_(settings_.getMoveRunAthleticsMultMax()),
-          positiveStepScalar(calculateSpeedScalar(settings.getMoveRunMultMin(), settings.getMoveRunMultMax())),
-          negativeStepScalar(calculateSpeedScalar(settings.getMoveRunMultMax(), settings.getMoveRunMultMin())) {};
+          moveRunMult_(settings_.moveRunMultMax.get()),
+          moveRunAthleticsMult_(settings_.moveRunAthleticsMultMax.get()),
+          positiveStepScalar(calculateSpeedScalar(settings.moveRunMultMin.get(), settings.moveRunMultMax.get())),
+          negativeStepScalar(calculateSpeedScalar(settings.moveRunMultMax.get(), settings.moveRunMultMin.get())) {};
 
     ~MovementController() = default;
 
@@ -71,8 +71,10 @@ class MovementController {
 
     /// Returns the inverse lerp of the given run speed multiplier between min and max, mapping it to [0, 1].
     float getNormalizedSpeedFactor(float moveRunMult) const {
-        float value = std::clamp(
-            inverse_lerp(settings.getMoveRunMultMin(), settings.getMoveRunMultMax(), moveRunMult), 0.0f, 1.0f);
+        float value =
+            std::clamp(inverse_lerp(settings.moveRunMultMin.get(), settings.moveRunMultMax.get(), moveRunMult),
+                       0.0f,
+                       1.0f);
         if (nearlyEqual(value, 0.0f)) {
             return 0.0f;
         } else if (nearlyEqual(value, 1.0f)) {
@@ -84,32 +86,32 @@ class MovementController {
     /// Increment the speed by one step.
     void incrementSpeed() {
         float speedFactor = getNormalizedSpeedFactor(moveRunMult_ * positiveStepScalar);
-        moveRunMult_ = lerp(settings.getMoveRunMultMin(), settings.getMoveRunMultMax(), speedFactor);
+        moveRunMult_ = lerp(settings.moveRunMultMin.get(), settings.moveRunMultMax.get(), speedFactor);
         moveRunAthleticsMult_ =
-            lerp(settings.getMoveRunAthleticsMultMin(), settings.getMoveRunAthleticsMultMax(), speedFactor);
+            lerp(settings.moveRunAthleticsMultMin.get(), settings.moveRunAthleticsMultMax.get(), speedFactor);
         applySpeed();
     }
 
     /// Decrement the speed by one step.
     void decrementSpeed() {
         float speedFactor = getNormalizedSpeedFactor(moveRunMult_ * negativeStepScalar);
-        moveRunMult_ = lerp(settings.getMoveRunMultMin(), settings.getMoveRunMultMax(), speedFactor);
+        moveRunMult_ = lerp(settings.moveRunMultMin.get(), settings.moveRunMultMax.get(), speedFactor);
         moveRunAthleticsMult_ =
-            lerp(settings.getMoveRunAthleticsMultMin(), settings.getMoveRunAthleticsMultMax(), speedFactor);
+            lerp(settings.moveRunAthleticsMultMin.get(), settings.moveRunAthleticsMultMax.get(), speedFactor);
         applySpeed();
     }
 
     /// Set the speed to the minimum value.
     void applyMinSpeed() {
-        moveRunMult_ = settings.getMoveRunMultMin();
-        moveRunAthleticsMult_ = settings.getMoveRunAthleticsMultMin();
+        moveRunMult_ = settings.moveRunMultMin.get();
+        moveRunAthleticsMult_ = settings.moveRunAthleticsMultMin.get();
         applySpeed();
     }
 
     /// Set the speed to the maximum value.
     void applyMaxSpeed() {
-        moveRunMult_ = settings.getMoveRunMultMax();
-        moveRunAthleticsMult_ = settings.getMoveRunAthleticsMultMax();
+        moveRunMult_ = settings.moveRunMultMax.get();
+        moveRunAthleticsMult_ = settings.moveRunAthleticsMultMax.get();
         applySpeed();
     }
 
@@ -122,11 +124,11 @@ class MovementController {
 
     /// Returns true if the player's current run speed is at the maximum value.
     bool isAtMaxSpeed() const {
-        return moveRunMult_ == settings.getMoveRunMultMax();
+        return moveRunMult_ == settings.moveRunMultMax.get();
     }
 
     /// Returns true if the player's current run speed is at the minimum value.
     bool isAtMinSpeed() const {
-        return moveRunMult_ == settings.getMoveRunMultMin();
+        return moveRunMult_ == settings.moveRunMultMin.get();
     }
 };

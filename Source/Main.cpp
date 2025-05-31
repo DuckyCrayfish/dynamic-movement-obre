@@ -73,12 +73,12 @@ class AdvancedMovement : public ModBase {
                     }
                     mc.incrementSpeed();
                 } else {
-                    if (pm.IsSprinting() && settings.getScrollTogglesSprintOff()) {
+                    if (pm.IsSprinting() && settings.scrollTogglesSprintOff.get()) {
                         pc.ToggleSprint();
                         mc.applyMaxSpeed();
                     } else {
                         mc.decrementSpeed();
-                        if (!walking && mc.isAtMinSpeed() && settings.getMoveRunMultMin() == 1) {
+                        if (!walking && mc.isAtMinSpeed() && settings.moveRunMultMin.get() == 1) {
                             pc.ToggleWalk();
                         }
                     }
@@ -88,24 +88,24 @@ class AdvancedMovement : public ModBase {
         RegisterModHook(
             STR("/Script/Altar.VEnhancedAltarPlayerController:MouseWheelUpInput"),
             [this]() {
-                if (shouldScrollAdjustMovement() && settings.getLockPOV()) {
+                if (shouldScrollAdjustMovement() && settings.lockPOV.get()) {
                     cameraController.lockPOV();
                 }
             },
             [this]() { cameraController.resetPOVLock(); });
 
 
-        if (settings.getResetSpeedOnRun()) {
+        if (settings.resetSpeedOnRun.get()) {
             RegisterModHook(STR("/Script/Altar.VEnhancedAltarPlayerController:ToggleWalk"),
                             [this]() { mc.applyMaxSpeed(); });
         }
 
-        if (settings.getResetSpeedOnSprint()) {
+        if (settings.resetSpeedOnSprint.get()) {
             RegisterModHook(STR("/Script/Altar.VEnhancedAltarPlayerController:ToggleSprint"),
                             [this]() { mc.applyMaxSpeed(); });
         }
 
-        if (settings.getHoldToSprint()) {
+        if (settings.holdToSprint.get()) {
             RegisterModHook(STR("/Script/Altar.VEnhancedAltarPlayerController:MovementForwardInput_Pressed"), [this]() {
                 if (!isSprintKeyPressed()) {
                     return;
@@ -134,7 +134,7 @@ class AdvancedMovement : public ModBase {
 
     /// Returns true if scrolling should currently control movement.
     bool shouldScrollAdjustMovement() {
-        return !settings.getHoldToAdjust() || isKeyPressed(settings.getHoldKey()).value();
+        return !settings.holdToAdjust.get() || isKeyPressed(settings.holdKey.get()).value();
     }
 
     /// Returns true if the sprint key is currently pressed, false otherwise.

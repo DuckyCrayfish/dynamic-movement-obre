@@ -22,53 +22,53 @@
 #include <stdio.h>
 
 #include <String/StringType.hpp>
+#include <any>
 #include <toml++/toml.hpp>
 
 #include "Utils/Logger.hpp"
 #include "Utils/ModUtils.hpp"
 
 
-struct SettingEntry {
-    std::string_view path;
-    std::variant<bool *, float *, int *, StringType *> ptr;
+template <typename T>
+class Setting {
+  private:
+    friend class Settings;
+    T value;
+
+  public:
+    const std::string_view path;
+
+    Setting(T defaultValue, std::string_view path) : value(defaultValue), path(path) {}
+
+    T get() const {
+        return value;
+    }
 };
+
 
 class Settings {
   private:
-    bool holdToAdjust = false;
-    StringType holdKey = STR("LeftAlt");
-    bool lockPOV = true;
-    int steps = 5;
-    bool scrollTogglesSprintOff = true;
-    bool resetSpeedOnRun = true;
-    bool resetSpeedOnSprint = true;
-    float moveRunMultMin = 1.0f;
-    float moveRunMultMax = 3.5f;
-    float moveRunAthleticsMultMin = 0.0f;
-    float moveRunAthleticsMultMax = 0.75f;
-    bool holdToSprint = false;
-
-    std::vector<SettingEntry> settingEntries_ = {
-        {"settings.holdToAdjust", &holdToAdjust},
-        {"settings.holdKey", &holdKey},
-        {"settings.lockPOV", &lockPOV},
-        {"settings.steps", &steps},
-        {"settings.scrollTogglesSprintOff", &scrollTogglesSprintOff},
-        {"settings.resetSpeedOnRun", &resetSpeedOnRun},
-        {"settings.resetSpeedOnSprint", &resetSpeedOnSprint},
-        {"settings.moveRunMultMin", &moveRunMultMin},
-        {"settings.moveRunMultMax", &moveRunMultMax},
-        {"settings.moveRunAthleticsMultMin", &moveRunAthleticsMultMin},
-        {"settings.moveRunAthleticsMultMax", &moveRunAthleticsMultMax},
-        {"settings.holdToSprint", &holdToSprint},
-    };
+    std::vector<std::variant<Setting<bool>*, Setting<int>*, Setting<float>*, Setting<StringType>*>> entries;
 
   public:
+    Setting<bool>& holdToAdjust = AddSetting<bool>(true, "settings.holdToAdjust");
+    Setting<StringType>& holdKey = AddSetting<StringType>(STR("LeftAlt"), "settings.holdKey");
+    Setting<bool>& lockPOV = AddSetting<bool>(true, "settings.lockPOV");
+    Setting<int>& steps = AddSetting<int>(5, "settings.steps");
+    Setting<bool>& scrollTogglesSprintOff = AddSetting<bool>(true, "settings.scrollTogglesSprintOff");
+    Setting<bool>& resetSpeedOnRun = AddSetting<bool>(true, "settings.resetSpeedOnRun");
+    Setting<bool>& resetSpeedOnSprint = AddSetting<bool>(true, "settings.resetSpeedOnSprint");
+    Setting<float>& moveRunMultMin = AddSetting<float>(1.0f, "settings.moveRunMultMin");
+    Setting<float>& moveRunMultMax = AddSetting<float>(3.5f, "settings.moveRunMultMax");
+    Setting<float>& moveRunAthleticsMultMin = AddSetting<float>(0.0f, "settings.moveRunAthleticsMultMin");
+    Setting<float>& moveRunAthleticsMultMax = AddSetting<float>(0.75f, "settings.moveRunAthleticsMultMax");
+    Setting<bool>& holdToSprint = AddSetting<bool>(true, "settings.holdToSprint");
+
     Settings(const StringType configPath, const StringType overrideDirectory) {
         // Parse the main config.
         parseFile(configPath, false);
         // Parse config overrides.
-        for (const auto &entry : std::filesystem::directory_iterator(overrideDirectory)) {
+        for (const auto& entry : std::filesystem::directory_iterator(overrideDirectory)) {
             if (entry.path().extension() == ".toml") {
                 auto filePath = entry.path().wstring();
                 parseFile(filePath, true);
@@ -76,41 +76,11 @@ class Settings {
         }
     }
 
-    bool getHoldToAdjust() const {
-        return holdToAdjust;
-    }
-    StringType getHoldKey() const {
-        return holdKey;
-    }
-    bool getLockPOV() const {
-        return lockPOV;
-    }
-    int getSteps() const {
-        return steps;
-    }
-    bool getScrollTogglesSprintOff() const {
-        return scrollTogglesSprintOff;
-    }
-    bool getResetSpeedOnRun() const {
-        return resetSpeedOnRun;
-    }
-    bool getResetSpeedOnSprint() const {
-        return resetSpeedOnSprint;
-    }
-    float getMoveRunMultMin() const {
-        return moveRunMultMin;
-    }
-    float getMoveRunMultMax() const {
-        return moveRunMultMax;
-    }
-    float getMoveRunAthleticsMultMin() const {
-        return moveRunAthleticsMultMin;
-    }
-    float getMoveRunAthleticsMultMax() const {
-        return moveRunAthleticsMultMax;
-    }
-    bool getHoldToSprint() const {
-        return holdToSprint;
+    template <typename T>
+    Setting<T>& AddSetting(T defaultValue, std::string_view path) {
+        auto* entry = new Setting<T>(defaultValue, path);
+        entries.emplace_back(entry);
+        return *entry;
     }
 
   private:
@@ -119,11 +89,11 @@ class Settings {
      * considered the main config file, otherwise, the file will be considered an
      * override file. This distinction only affects error messages.
      */
-    void parseFile(const StringType &filePath, const bool isOverride) {
+    void parseFile(const StringType& filePath, const bool isOverride) {
         toml::table table;
         try {
             table = toml::parse_file(filePath);
-        } catch (const toml::parse_error &err) {
+        } catch (const toml::parse_error& err) {
             if (!isOverride) {
                 Logger::log<LogLevel::Warning>(STR("Failed to parse main config file:\n"));
             } else {
@@ -148,23 +118,24 @@ class Settings {
             Logger::log<LogLevel::Normal>(to_wstring(filePath) + STR("\n"));
         }
 
-        for (const auto &entry : settingEntries_) {
+        for (auto& entry : entries) {
             std::visit(
-                [table, entry](auto &&ptr) {
-                    using ValueType = std::remove_pointer_t<std::decay_t<decltype(ptr)>>;
-                    auto path = toml::path(entry.path);
+                [table](auto* entry) {
+                    using ValueType = std::decay_t<decltype(entry->value)>;
+                    auto path = toml::path(entry->path);
                     auto node = table[path];
                     if (!node) {
                         // Key does not exist, skip.
                         return;
                     }
                     if (auto value = node.value<ValueType>()) {
-                        *ptr = *value;
+                        entry->value = *value;
                     } else {
-                        Logger::log<LogLevel::Warning>(STR("Invalid value found at: \"{}\"\n"), to_wstring(entry.path));
+                        Logger::log<LogLevel::Warning>(STR("Invalid value found at: \"{}\"\n"),
+                                                       to_wstring(entry->path));
                     }
                 },
-                entry.ptr);
+                entry);
         }
     }
 };
