@@ -88,19 +88,19 @@ class AdvancedMovement : public ModBase {
         RegisterModHook(
             STR("/Script/Altar.VEnhancedAltarPlayerController:MouseWheelUpInput"),
             [this]() {
-                if (shouldScrollAdjustMovement()) {
+                if (shouldScrollAdjustMovement() && settings.getLockPOV()) {
                     cameraController.lockPOV();
                 }
             },
             [this]() { cameraController.resetPOVLock(); });
 
 
-        if (settings.getToggleMaxSpeedOnRun()) {
+        if (settings.getResetSpeedOnRun()) {
             RegisterModHook(STR("/Script/Altar.VEnhancedAltarPlayerController:ToggleWalk"),
                             [this]() { mc.applyMaxSpeed(); });
         }
 
-        if (settings.getToggleMaxSpeedOnSprint()) {
+        if (settings.getResetSpeedOnSprint()) {
             RegisterModHook(STR("/Script/Altar.VEnhancedAltarPlayerController:ToggleSprint"),
                             [this]() { mc.applyMaxSpeed(); });
         }
@@ -134,7 +134,7 @@ class AdvancedMovement : public ModBase {
 
     /// Returns true if scrolling should currently control movement.
     bool shouldScrollAdjustMovement() {
-        return !settings.getUseHoldKey() || isKeyPressed(settings.getHoldKey()).value();
+        return !settings.getHoldToAdjust() || isKeyPressed(settings.getHoldKey()).value();
     }
 
     /// Returns true if the sprint key is currently pressed, false otherwise.

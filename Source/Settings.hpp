@@ -35,29 +35,31 @@ struct SettingEntry {
 
 class Settings {
   private:
-    bool useHoldKey = false;
+    bool holdToAdjust = false;
     StringType holdKey = STR("LeftAlt");
+    bool lockPOV = true;
+    int steps = 5;
+    bool scrollTogglesSprintOff = true;
+    bool resetSpeedOnRun = true;
+    bool resetSpeedOnSprint = true;
     float moveRunMultMin = 1.0f;
     float moveRunMultMax = 3.5f;
     float moveRunAthleticsMultMin = 0.0f;
     float moveRunAthleticsMultMax = 0.75f;
-    int steps = 5;
-    bool scrollTogglesSprintOff = true;
-    bool toggleMaxSpeedOnRun = true;
-    bool toggleMaxSpeedOnSprint = true;
     bool holdToSprint = false;
 
     std::vector<SettingEntry> settingEntries_ = {
-        {"settings.useHoldKey", &useHoldKey},
+        {"settings.holdToAdjust", &holdToAdjust},
         {"settings.holdKey", &holdKey},
+        {"settings.lockPOV", &lockPOV},
+        {"settings.steps", &steps},
+        {"settings.scrollTogglesSprintOff", &scrollTogglesSprintOff},
+        {"settings.resetSpeedOnRun", &resetSpeedOnRun},
+        {"settings.resetSpeedOnSprint", &resetSpeedOnSprint},
         {"settings.moveRunMultMin", &moveRunMultMin},
         {"settings.moveRunMultMax", &moveRunMultMax},
         {"settings.moveRunAthleticsMultMin", &moveRunAthleticsMultMin},
         {"settings.moveRunAthleticsMultMax", &moveRunAthleticsMultMax},
-        {"settings.steps", &steps},
-        {"settings.scrollTogglesSprintOff", &scrollTogglesSprintOff},
-        {"settings.toggleMaxSpeedOnRun", &toggleMaxSpeedOnRun},
-        {"settings.toggleMaxSpeedOnSprint", &toggleMaxSpeedOnSprint},
         {"settings.holdToSprint", &holdToSprint},
     };
 
@@ -74,11 +76,26 @@ class Settings {
         }
     }
 
-    bool getUseHoldKey() const {
-        return useHoldKey;
+    bool getHoldToAdjust() const {
+        return holdToAdjust;
     }
     StringType getHoldKey() const {
         return holdKey;
+    }
+    bool getLockPOV() const {
+        return lockPOV;
+    }
+    int getSteps() const {
+        return steps;
+    }
+    bool getScrollTogglesSprintOff() const {
+        return scrollTogglesSprintOff;
+    }
+    bool getResetSpeedOnRun() const {
+        return resetSpeedOnRun;
+    }
+    bool getResetSpeedOnSprint() const {
+        return resetSpeedOnSprint;
     }
     float getMoveRunMultMin() const {
         return moveRunMultMin;
@@ -91,18 +108,6 @@ class Settings {
     }
     float getMoveRunAthleticsMultMax() const {
         return moveRunAthleticsMultMax;
-    }
-    int getSteps() const {
-        return steps;
-    }
-    bool getScrollTogglesSprintOff() const {
-        return scrollTogglesSprintOff;
-    }
-    bool getToggleMaxSpeedOnRun() const {
-        return toggleMaxSpeedOnRun;
-    }
-    bool getToggleMaxSpeedOnSprint() const {
-        return toggleMaxSpeedOnSprint;
     }
     bool getHoldToSprint() const {
         return holdToSprint;
