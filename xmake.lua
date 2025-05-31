@@ -13,6 +13,7 @@ target(projectName)
     add_packages("toml++")
     add_files("Source/**.cpp")
     add_defines("MOD_NAME=\"" .. projectName .. "\"")
+    add_defines("MOD_VERSION=\"" .. projectVersion .. "\"")
 
 xpack(projectName)
     set_version(projectVersion)

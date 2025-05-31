@@ -29,12 +29,7 @@
 #include <DynamicOutput/DynamicOutput.hpp>
 #include <UnrealDef.hpp>
 
-#ifndef MOD_NAME
-#error "MOD_NAME must be defined."
-#endif
-
-#define STRINGIFY(x) STR(x)
-#define MOD_NAME_STR STRINGIFY(MOD_NAME)
+#include "../Metadata.hpp"
 
 
 namespace Logger {

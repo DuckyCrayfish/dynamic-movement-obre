@@ -25,18 +25,12 @@
 #include <optional>
 
 #include "CameraController.hpp"
+#include "Metadata.hpp"
 #include "MovementController.hpp"
 #include "Settings.hpp"
 #include "Shapes/FInputActionValue.hpp"
 #include "Utils/Logger.hpp"
 #include "Utils/ModUtils.hpp"
-
-#ifndef MOD_NAME
-#error "MOD_NAME must be defined."
-#endif
-
-#define STRINGIFY(x) STR(x)
-#define MOD_NAME_STR STRINGIFY(MOD_NAME)
 
 using namespace ModUtils;
 
@@ -53,7 +47,7 @@ class AdvancedMovement : public ModBase {
 
     AdvancedMovement() : settings(configPath, overrideDirectory), mc(settings) {
         ModName = MOD_NAME_STR;
-        ModVersion = STR("1.0");
+        ModVersion = MOD_VERSION_STR;
         ModDescription = STR("This is my awesome mod");
         ModAuthors = STR("DuckyCrayfish");
     }
