@@ -1,0 +1,50 @@
+[settings]
+
+# ===============================================
+# ============== Common Settings ================
+# ===============================================
+
+# When enabled, scrolling will only adjust run speed when `holdKey` is held.
+holdToAdjust = true
+
+# The key that needs to be held to adjust movement speed.
+holdKey = "LeftAlt"
+
+# Whether or not to lock the POV while movement speed is being adjusted.
+lockPOV = true
+
+# Scroll speed sensitivity. Controls how many scrolls it
+# takes to go between the minimum and maximum speed.
+steps = 5
+
+# Whether or not decrementing the speed while
+# sprinting will toggle off sprinting.
+scrollTogglesSprintOff = true
+
+# Resets the run speed to the maximum value when
+# manually switching from "walking" to "running".
+resetSpeedOnRun = true
+
+# Resets the run speed to the maximum value on sprint.
+resetSpeedOnSprint = true
+
+# Enables the "hold to sprint" feature.
+holdToSprint = true
+
+# ============== Speed Modifiers =================
+# This mod works by adjusting the multipliers
+# associated with run speed between the minimum
+# maximum values listed below.
+# ================================================
+
+# Run speed multiplier.
+# A value of 1.0 is equivalent to walking.
+# Default value in game: 3.5
+moveRunMultMin = 1
+moveRunMultMax = 3.5
+
+# Run speed athletics skill multiplier.
+# A value of 0.0 is equivalent to walking.
+# Default value in game: 0.75
+moveRunAthleticsMultMin = 0
+moveRunAthleticsMultMax = 0.75
