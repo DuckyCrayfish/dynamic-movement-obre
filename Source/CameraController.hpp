@@ -44,6 +44,6 @@ class CameraController {
             return;
         }
         didLockPOV = false;
-        ModUtils::GetPlayerController().SetMember(STR("bIsPOVChangeLocked"), previousValuePOV);
+        ModUtils::GetPlayerController().SetMemberInChain(STR("bIsPOVChangeLocked"), previousValuePOV);
     }
 };
