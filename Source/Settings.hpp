@@ -62,6 +62,7 @@ class Settings {
     Setting<float>& moveRunMultMax = AddSetting<float>(3.5f, "settings.moveRunMultMax");
     Setting<float>& moveRunAthleticsMultMin = AddSetting<float>(0.0f, "settings.moveRunAthleticsMultMin");
     Setting<float>& moveRunAthleticsMultMax = AddSetting<float>(0.75f, "settings.moveRunAthleticsMultMax");
+    Setting<float>& sneakSpeedMult = AddSetting<float>(0.6f, "settings.sneakSpeedMult");
     Setting<bool>& holdToSprint = AddSetting<bool>(true, "settings.holdToSprint");
 
     Settings(const StringType configPath, const StringType overrideDirectory) {

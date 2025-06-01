@@ -118,8 +118,11 @@ class MovementController {
     /// Apply the speed values currently stored in this instance to the player.
     void applySpeed() const {
         auto playerMovement = GetPlayerMovement();
+        float sneakSpeedFactor = inverse_lerp(1, settings.moveRunMultMax.get(), moveRunMult_);
+        float sneakSpeed = lerp(1, settings.sneakSpeedMult.get(), sneakSpeedFactor);
         playerMovement.SetMemberInChain(STR("MoveRunMult"), moveRunMult_);
         playerMovement.SetMemberInChain(STR("MoveRunAthleticsMult"), moveRunAthleticsMult_);
+        playerMovement.SetMemberInChain(STR("MoveSneakRunMult"), sneakSpeed);
     }
 
     /// Returns true if the player's current run speed is at the maximum value.
