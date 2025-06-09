@@ -25,14 +25,16 @@
 #include <optional>
 
 #include "CameraController.hpp"
+#include "Helpers/HookRegistry.hpp"
+#include "Helpers/UnrealHelpers.hpp"
+#include "Logger/Logger.hpp"
 #include "Metadata.hpp"
 #include "MovementController.hpp"
 #include "Settings.hpp"
 #include "Shapes/FInputActionValue.hpp"
-#include "Utils/Logger.hpp"
-#include "Utils/ModUtils.hpp"
 
-using namespace ModUtils;
+using namespace HookRegistry;
+using namespace Helpers;
 
 
 auto modPath = RC::UE4SSProgram::get_program().get_mods_directory();
@@ -134,12 +136,12 @@ class AdvancedMovement : public ModBase {
 
     /// Returns true if scrolling should currently control movement.
     bool shouldScrollAdjustMovement() {
-        return !settings.holdToAdjust.get() || isKeyPressed(settings.holdKey.get()).value();
+        return !settings.holdToAdjust.get() || IsKeyPressed(settings.holdKey.get()).value();
     }
 
     /// Returns true if the sprint key is currently pressed, false otherwise.
     bool isSprintKeyPressed() const {
-        return isInputActionKeyPressed(STR("IMC_Game_Movement"), STR("IA_Game_Movement_Sprint"));
+        return IsInputActionKeyPressed(STR("IMC_Game_Movement"), STR("IA_Game_Movement_Sprint"));
     }
 };
 

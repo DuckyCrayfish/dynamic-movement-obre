@@ -22,8 +22,8 @@
 #include <Helpers/String.hpp>
 #include <Unreal/UObject.hpp>
 
-#include "../Shapes/FInputActionValue.hpp"
 #include "PlayerCharacter.hpp"
+#include "Shapes/FInputActionValue.hpp"
 #include "UObject.hpp"
 
 

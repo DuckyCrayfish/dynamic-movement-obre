@@ -25,69 +25,13 @@
 #include <UnrealDef.hpp>
 #include <expected>
 
-#include "../Shapes/FKey.hpp"
-#include "../Wrappers/Wrappers.hpp"
+#include "Shapes/FKey.hpp"
+#include "Wrappers/Wrappers.hpp"
 
 using namespace RC::Unreal;
 
 
-namespace ModUtils {
-    using FunctionContext = Unreal::UnrealScriptFunctionCallableContext;
-    using UnrealScriptFunctionCallable = Unreal::UnrealScriptFunctionCallable;
-
-    class ModBase : public RC::CppUserModBase {
-      public:
-        ~ModBase() {
-            for (auto it = hookRegistrations.rbegin(); it != hookRegistrations.rend(); ++it) {
-                const auto& [hookName, handle, unregister] = *it;
-                if (unregister) {
-                    RC::Unreal::UObjectGlobals::UnregisterHook(hookName, {handle, unregister});
-                }
-            }
-        }
-
-      protected:
-        std::vector<std::tuple<StringType, int, int>> hookRegistrations;
-
-        std::pair<int, int> RegisterModHook(const StringType& functionFullNameNoType,
-                                            std::function<void()> preCallback) {
-            return RegisterModHook(
-                functionFullNameNoType,
-                [preCallback](FunctionContext&, void*) { preCallback(); },
-                [](FunctionContext&, void*) {},
-                nullptr);
-        }
-
-        std::pair<int, int> RegisterModHook(const StringType& functionFullNameNoType,
-                                            UnrealScriptFunctionCallable preCallback) {
-            return RegisterModHook(functionFullNameNoType, preCallback, [](FunctionContext&, void*) {}, nullptr);
-        }
-
-        std::pair<int, int> RegisterModHook(const StringType& functionFullNameNoType, std::function<void()> preCallback,
-                                            std::function<void()> postCallback) {
-            return RegisterModHook(
-                functionFullNameNoType,
-                [preCallback](FunctionContext&, void*) { preCallback(); },
-                [postCallback](FunctionContext&, void*) { postCallback(); },
-                nullptr);
-        }
-
-        std::pair<int, int> RegisterModHook(const StringType& functionFullNameNoType,
-                                            UnrealScriptFunctionCallable preCallback,
-                                            UnrealScriptFunctionCallable postCallback) {
-            return RegisterModHook(functionFullNameNoType, preCallback, postCallback, nullptr);
-        }
-
-        std::pair<int, int> RegisterModHook(const StringType& functionFullNameNoType,
-                                            UnrealScriptFunctionCallable preCallback,
-                                            UnrealScriptFunctionCallable postCallback, void* customData) {
-            auto [preId, postId] =
-                RC::Unreal::UObjectGlobals::RegisterHook(functionFullNameNoType, preCallback, postCallback, customData);
-            hookRegistrations.emplace_back(functionFullNameNoType, preId, postId);
-            return {preId, postId};
-        }
-    };
-
+namespace Helpers {
     Wrappers::PlayerControllerWrapper GetPlayerController() {
         static UObject* playerController = nullptr;
 
@@ -109,7 +53,7 @@ namespace ModUtils {
     }
 
     /** Returns true if `key` is pressed, otherwise false. */
-    std::expected<bool, StringType> isKeyPressed(FKey& key) {
+    std::expected<bool, StringType> IsKeyPressed(FKey& key) {
         auto playerController = GetPlayerController();
         auto IsInputKeyDown = playerController.GetFunctionByNameInChain(STR("IsInputKeyDown"));
 
@@ -125,9 +69,9 @@ namespace ModUtils {
     }
 
     /** Returns true if `key` is pressed, otherwise false. */
-    std::expected<bool, StringType> isKeyPressed(StringType key) {
+    std::expected<bool, StringType> IsKeyPressed(StringType key) {
         FKey fKey = FKey(key);
-        return isKeyPressed(fKey);
+        return IsKeyPressed(fKey);
     }
 
     static auto NameInputMappingContext = FName(STR("InputMappingContext"));
@@ -143,7 +87,7 @@ namespace ModUtils {
     }
 
     /** Returns true if the specified input action is pressed, otherwise false. */
-    bool isInputActionKeyPressed(const StringType& inputMappingContextName, const StringType& inputActionName) {
+    bool IsInputActionKeyPressed(const StringType& inputMappingContextName, const StringType& inputActionName) {
         auto imc = GetInputMappingContext(inputMappingContextName);
         auto mappingsProperty = imc.GetMemberInChain<FScriptArray>(STR("Mappings"));
 
@@ -165,7 +109,7 @@ namespace ModUtils {
             auto key = keyProperty->ContainerPtrToValuePtr<FKey>(element);
             auto action = *actionProperty->ContainerPtrToValuePtr<UObject*>(element);
 
-            if (action->GetNamePrivate().Equals(SprintActionName) && isKeyPressed(*key).value_or(false)) {
+            if (action->GetNamePrivate().Equals(SprintActionName) && IsKeyPressed(*key).value_or(false)) {
                 return true;
             }
         }

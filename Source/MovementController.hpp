@@ -19,13 +19,13 @@
 
 #include <algorithm>
 
+#include "Helpers/UnrealHelpers.hpp"
+#include "Logger/Logger.hpp"
 #include "Settings.hpp"
 #include "Shapes/FInputActionValue.hpp"
-#include "Utils/Logger.hpp"
-#include "Utils/ModUtils.hpp"
 #include "Wrappers/Wrappers.hpp"
 
-using namespace ModUtils;
+using namespace Helpers;
 
 
 class MovementController {

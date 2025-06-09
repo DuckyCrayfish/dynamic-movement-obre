@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "Utils/ModUtils.hpp"
+#include "Helpers/UnrealHelpers.hpp"
 
 
 /** @brief This class handles the camera POV locking mechanism. */
@@ -31,7 +31,7 @@ class CameraController {
   public:
     /// Locks the player's POV, preventing it from being changed on-scroll.
     void lockPOV() {
-        auto playerController = ModUtils::GetPlayerController();
+        auto playerController = Helpers::GetPlayerController();
         bool* bIsPOVChangeLocked = playerController.GetMemberInChain<bool>(STR("bIsPOVChangeLocked"));
         previousValuePOV = *bIsPOVChangeLocked;
         didLockPOV = true;
@@ -44,6 +44,6 @@ class CameraController {
             return;
         }
         didLockPOV = false;
-        ModUtils::GetPlayerController().SetMemberInChain(STR("bIsPOVChangeLocked"), previousValuePOV);
+        Helpers::GetPlayerController().SetMemberInChain(STR("bIsPOVChangeLocked"), previousValuePOV);
     }
 };

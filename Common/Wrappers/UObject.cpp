@@ -22,7 +22,7 @@
 #include <Helpers/String.hpp>
 #include <UnrealDef.hpp>
 
-#include "../Utils/Logger.hpp"
+#include "Logger/Logger.hpp"
 
 using namespace RC;
 using namespace RC::Unreal;
