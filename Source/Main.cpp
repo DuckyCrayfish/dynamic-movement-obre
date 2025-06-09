@@ -57,7 +57,7 @@ class AdvancedMovement : public RC::CppUserModBase {
             STR("/Script/Altar.VEnhancedAltarPlayerController:MouseWheelUpInput"),
             [](FunctionContext&, void*) {},
             [this](FunctionContext& context, void*) {
-                if (!shouldScrollAdjustMovement()) {
+                if (!IsControllingSpeed()) {
                     return;
                 }
 
@@ -88,7 +88,7 @@ class AdvancedMovement : public RC::CppUserModBase {
         hooks.Register(
             STR("/Script/Altar.VEnhancedAltarPlayerController:MouseWheelUpInput"),
             [this]() {
-                if (shouldScrollAdjustMovement() && settings.lockPOV.get()) {
+                if (IsControllingSpeed() && settings.lockPOV.get()) {
                     cameraController.lockPOV();
                 }
             },
@@ -107,7 +107,7 @@ class AdvancedMovement : public RC::CppUserModBase {
 
         if (settings.holdToSprint.get()) {
             hooks.Register(STR("/Script/Altar.VEnhancedAltarPlayerController:MovementForwardInput_Pressed"), [this]() {
-                if (!isSprintKeyPressed()) {
+                if (!IsSprintKeyPressed()) {
                     return;
                 }
 
@@ -134,12 +134,13 @@ class AdvancedMovement : public RC::CppUserModBase {
     }
 
     /// Returns true if scrolling should currently control movement.
-    bool shouldScrollAdjustMovement() {
+    bool IsControllingSpeed() {
         return !settings.holdToAdjust.get() || Helpers::IsKeyPressed(settings.holdKey.get()).value();
     }
 
+  private:
     /// Returns true if the sprint key is currently pressed, false otherwise.
-    bool isSprintKeyPressed() const {
+    bool IsSprintKeyPressed() const {
         return Helpers::IsInputActionKeyPressed(STR("IMC_Game_Movement"), STR("IA_Game_Movement_Sprint"));
     }
 };

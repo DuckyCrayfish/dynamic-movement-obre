@@ -30,6 +30,7 @@
 
 class Settings : public SettingsBase<bool, float, int, StringType> {
   public:
+    Settings() = default;
     Settings(const StringType configPath, const StringType overrideDirectory) : SettingsBase() {
         // Parse the main config.
         readFromFile(configPath);
