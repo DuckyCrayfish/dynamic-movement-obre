@@ -31,13 +31,15 @@
 using namespace RC::Unreal;
 
 
-namespace HookRegistry {
+namespace Helpers {
     using FunctionContext = Unreal::UnrealScriptFunctionCallableContext;
     using UnrealScriptFunctionCallable = Unreal::UnrealScriptFunctionCallable;
 
-    class ModBase : public RC::CppUserModBase {
+    class HookRegistry {
       public:
-        ~ModBase() {
+        std::vector<std::tuple<StringType, int, int>> hookRegistrations;
+
+        ~HookRegistry() {
             for (auto it = hookRegistrations.rbegin(); it != hookRegistrations.rend(); ++it) {
                 const auto& [hookName, handle, unregister] = *it;
                 if (unregister) {
@@ -46,41 +48,35 @@ namespace HookRegistry {
             }
         }
 
-      protected:
-        std::vector<std::tuple<StringType, int, int>> hookRegistrations;
-
-        std::pair<int, int> RegisterModHook(const StringType& functionFullNameNoType,
-                                            std::function<void()> preCallback) {
-            return RegisterModHook(
+        std::pair<int, int> Register(const StringType& functionFullNameNoType, std::function<void()> preCallback) {
+            return Register(
                 functionFullNameNoType,
                 [preCallback](FunctionContext&, void*) { preCallback(); },
                 [](FunctionContext&, void*) {},
                 nullptr);
         }
 
-        std::pair<int, int> RegisterModHook(const StringType& functionFullNameNoType,
-                                            UnrealScriptFunctionCallable preCallback) {
-            return RegisterModHook(functionFullNameNoType, preCallback, [](FunctionContext&, void*) {}, nullptr);
+        std::pair<int, int> Register(const StringType& functionFullNameNoType,
+                                     UnrealScriptFunctionCallable preCallback) {
+            return Register(functionFullNameNoType, preCallback, [](FunctionContext&, void*) {}, nullptr);
         }
 
-        std::pair<int, int> RegisterModHook(const StringType& functionFullNameNoType, std::function<void()> preCallback,
-                                            std::function<void()> postCallback) {
-            return RegisterModHook(
+        std::pair<int, int> Register(const StringType& functionFullNameNoType, std::function<void()> preCallback,
+                                     std::function<void()> postCallback) {
+            return Register(
                 functionFullNameNoType,
                 [preCallback](FunctionContext&, void*) { preCallback(); },
                 [postCallback](FunctionContext&, void*) { postCallback(); },
                 nullptr);
         }
 
-        std::pair<int, int> RegisterModHook(const StringType& functionFullNameNoType,
-                                            UnrealScriptFunctionCallable preCallback,
-                                            UnrealScriptFunctionCallable postCallback) {
-            return RegisterModHook(functionFullNameNoType, preCallback, postCallback, nullptr);
+        std::pair<int, int> Register(const StringType& functionFullNameNoType, UnrealScriptFunctionCallable preCallback,
+                                     UnrealScriptFunctionCallable postCallback) {
+            return Register(functionFullNameNoType, preCallback, postCallback, nullptr);
         }
 
-        std::pair<int, int> RegisterModHook(const StringType& functionFullNameNoType,
-                                            UnrealScriptFunctionCallable preCallback,
-                                            UnrealScriptFunctionCallable postCallback, void* customData) {
+        std::pair<int, int> Register(const StringType& functionFullNameNoType, UnrealScriptFunctionCallable preCallback,
+                                     UnrealScriptFunctionCallable postCallback, void* customData) {
             auto [preId, postId] =
                 RC::Unreal::UObjectGlobals::RegisterHook(functionFullNameNoType, preCallback, postCallback, customData);
             hookRegistrations.emplace_back(functionFullNameNoType, preId, postId);

@@ -33,19 +33,17 @@
 #include "Settings.hpp"
 #include "Shapes/FInputActionValue.hpp"
 
-using namespace HookRegistry;
-using namespace Helpers;
-
 
 auto modPath = RC::UE4SSProgram::get_program().get_mods_directory();
 auto configPath = fmt::format(STR(R"({}\{}\config.toml)"), modPath, MOD_NAME_STR);
 auto overrideDirectory = fmt::format(STR(R"({}\{}\ConfigOverrides)"), modPath, MOD_NAME_STR);
 
-class AdvancedMovement : public ModBase {
+class AdvancedMovement : public RC::CppUserModBase {
   public:
     Settings settings;
     CameraController cameraController;
     MovementController mc;
+    Helpers::HookRegistry hooks;
 
     AdvancedMovement() : settings(configPath, overrideDirectory), mc(settings) {
         ModName = MOD_NAME_STR;
@@ -55,7 +53,7 @@ class AdvancedMovement : public ModBase {
     }
 
     auto on_unreal_init() -> void override {
-        RegisterModHook(
+        hooks.Register(
             STR("/Script/Altar.VEnhancedAltarPlayerController:MouseWheelUpInput"),
             [](FunctionContext&, void*) {},
             [this](FunctionContext& context, void*) {
@@ -87,7 +85,7 @@ class AdvancedMovement : public ModBase {
                 }
             });
 
-        RegisterModHook(
+        hooks.Register(
             STR("/Script/Altar.VEnhancedAltarPlayerController:MouseWheelUpInput"),
             [this]() {
                 if (shouldScrollAdjustMovement() && settings.lockPOV.get()) {
@@ -98,23 +96,23 @@ class AdvancedMovement : public ModBase {
 
 
         if (settings.resetSpeedOnRun.get()) {
-            RegisterModHook(STR("/Script/Altar.VEnhancedAltarPlayerController:ToggleWalk"),
-                            [this]() { mc.applyMaxSpeed(); });
+            hooks.Register(STR("/Script/Altar.VEnhancedAltarPlayerController:ToggleWalk"),
+                           [this]() { mc.applyMaxSpeed(); });
         }
 
         if (settings.resetSpeedOnSprint.get()) {
-            RegisterModHook(STR("/Script/Altar.VEnhancedAltarPlayerController:ToggleSprint"),
-                            [this]() { mc.applyMaxSpeed(); });
+            hooks.Register(STR("/Script/Altar.VEnhancedAltarPlayerController:ToggleSprint"),
+                           [this]() { mc.applyMaxSpeed(); });
         }
 
         if (settings.holdToSprint.get()) {
-            RegisterModHook(STR("/Script/Altar.VEnhancedAltarPlayerController:MovementForwardInput_Pressed"), [this]() {
+            hooks.Register(STR("/Script/Altar.VEnhancedAltarPlayerController:MovementForwardInput_Pressed"), [this]() {
                 if (!isSprintKeyPressed()) {
                     return;
                 }
 
-                auto pc = GetPlayerController();
-                auto pm = GetPlayerMovement();
+                auto pc = Helpers::GetPlayerController();
+                auto pm = Helpers::GetPlayerMovement();
 
                 if (pc.IsHorseRiding()) {
                     if (!pc.GetWantsToGallop()) {
@@ -127,21 +125,22 @@ class AdvancedMovement : public ModBase {
                 }
             });
 
-            RegisterModHook(STR("/Script/Altar.VEnhancedAltarPlayerController:ShiftKeyInput_Released"), [this]() {
-                GetPlayerController().DisableSprintToggle();
-                GetPlayerController().DisableGallopToggle();
+            hooks.Register(STR("/Script/Altar.VEnhancedAltarPlayerController:ShiftKeyInput_Released"), [this]() {
+                auto pc = Helpers::GetPlayerController();
+                pc.DisableSprintToggle();
+                pc.DisableGallopToggle();
             });
         }
     }
 
     /// Returns true if scrolling should currently control movement.
     bool shouldScrollAdjustMovement() {
-        return !settings.holdToAdjust.get() || IsKeyPressed(settings.holdKey.get()).value();
+        return !settings.holdToAdjust.get() || Helpers::IsKeyPressed(settings.holdKey.get()).value();
     }
 
     /// Returns true if the sprint key is currently pressed, false otherwise.
     bool isSprintKeyPressed() const {
-        return IsInputActionKeyPressed(STR("IMC_Game_Movement"), STR("IA_Game_Movement_Sprint"));
+        return Helpers::IsInputActionKeyPressed(STR("IMC_Game_Movement"), STR("IA_Game_Movement_Sprint"));
     }
 };
 
