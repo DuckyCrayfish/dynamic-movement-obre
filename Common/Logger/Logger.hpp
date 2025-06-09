@@ -29,7 +29,14 @@
 #include <DynamicOutput/DynamicOutput.hpp>
 #include <UnrealDef.hpp>
 
-#include "../Metadata.hpp"
+
+// Set using build system variables
+#ifndef MOD_NAME
+#error "MOD_NAME must be defined."
+#endif
+
+#define STR_MACRO(x) STR(x)
+#define MOD_NAME_STR STR_MACRO(MOD_NAME)
 
 
 namespace Logger {

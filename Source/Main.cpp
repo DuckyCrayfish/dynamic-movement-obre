@@ -28,10 +28,22 @@
 #include "Helpers/HookRegistry.hpp"
 #include "Helpers/UnrealHelpers.hpp"
 #include "Logger/Logger.hpp"
-#include "Metadata.hpp"
 #include "MovementController.hpp"
 #include "Settings.hpp"
 #include "Shapes/FInputActionValue.hpp"
+
+// Set using build system variables
+#ifndef MOD_NAME
+#error "MOD_NAME must be defined."
+#endif
+
+#ifndef MOD_VERSION
+#error "MOD_VERSION must be defined."
+#endif
+
+#define STR_MACRO(x) STR(x)
+#define MOD_NAME_STR STR_MACRO(MOD_NAME)
+#define MOD_VERSION_STR STR_MACRO(MOD_VERSION)
 
 
 auto modPath = RC::UE4SSProgram::get_program().get_mods_directory();
