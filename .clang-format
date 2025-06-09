@@ -1,4 +1,6 @@
 BasedOnStyle: Google
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: true
 ColumnLimit: 120
 IndentWidth: 4
 
