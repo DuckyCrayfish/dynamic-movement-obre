@@ -74,25 +74,29 @@ namespace Helpers {
         return IsKeyPressed(fKey);
     }
 
-    static auto NameInputMappingContext = FName(STR("InputMappingContext"));
-
     /** Returns a pointer to the input mapping context if it exists. */
-    Wrappers::UObjectWrapper GetInputMappingContext(const StringType& name) {
-        auto fName = FName(name);
-        auto imc = RC::Unreal::UObjectGlobals::FindObject(NameInputMappingContext, fName);
+    Wrappers::UObjectWrapper GetInputMappingContext(const FName& Name) {
+        static auto NameInputMappingContext = FName(STR("InputMappingContext"));
+        auto imc = RC::Unreal::UObjectGlobals::FindObject(NameInputMappingContext, Name);
         if (!imc) {
             throw std::runtime_error("InputMappingContext object not found");
         }
         return Wrappers::UObjectWrapper(imc);
     }
 
+    /** Returns a pointer to the input mapping context if it exists. */
+    Wrappers::UObjectWrapper GetInputMappingContext(const StringType& NameStr) {
+        auto name = FName(NameStr);
+        return GetInputMappingContext(name);
+    }
+
     /** Returns true if the specified input action is pressed, otherwise false. */
-    bool IsInputActionKeyPressed(const StringType& inputMappingContextName, const StringType& inputActionName) {
-        auto imc = GetInputMappingContext(inputMappingContextName);
+    bool IsInputActionKeyPressed(const StringType& InputMappingContextName, const StringType& InputActionName) {
+        auto imc = GetInputMappingContext(InputMappingContextName);
         auto mappingsProperty = imc.GetMemberInChain<FScriptArray>(STR("Mappings"));
 
         auto mappings = StaticCast<FArrayProperty*>(imc.GetPropertyByNameInChain(STR("Mappings")));
-        static auto SprintActionName = FName(inputActionName, FNAME_Add);
+        static auto SprintActionName = FName(InputActionName);
         const int32 ElementSize = mappings->GetInner()->GetElementSize();
         auto actionKeyMapping = static_cast<FStructProperty*>(mappings->GetInner());
         FProperty* keyProperty = actionKeyMapping->GetStruct()->GetPropertyByNameInChain(STR("Key"));
