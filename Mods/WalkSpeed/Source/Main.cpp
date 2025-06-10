@@ -50,14 +50,14 @@ auto modPath = RC::UE4SSProgram::get_program().get_mods_directory();
 auto configPath = fmt::format(STR(R"({}\{}\config.toml)"), modPath, MOD_NAME_STR);
 auto overrideDirectory = fmt::format(STR(R"({}\{}\ConfigOverrides)"), modPath, MOD_NAME_STR);
 
-class AdvancedMovement : public RC::CppUserModBase {
+class WalkSpeed : public RC::CppUserModBase {
   public:
     Settings settings;
     CameraController cameraController;
     MovementController mc;
     Helpers::HookRegistry hooks;
 
-    AdvancedMovement() : settings(configPath, overrideDirectory), mc(settings) {
+    WalkSpeed() : settings(configPath, overrideDirectory), mc(settings) {
         ModName = MOD_NAME_STR;
         ModVersion = MOD_VERSION_STR;
         ModDescription = STR("This is my awesome mod");
@@ -116,54 +116,21 @@ class AdvancedMovement : public RC::CppUserModBase {
             hooks.Register(STR("/Script/Altar.VEnhancedAltarPlayerController:ToggleSprint"),
                            [this]() { mc.applyMaxSpeed(); });
         }
-
-        if (settings.holdToSprint.get()) {
-            hooks.Register(STR("/Script/Altar.VEnhancedAltarPlayerController:MovementForwardInput_Pressed"), [this]() {
-                if (!IsSprintKeyPressed()) {
-                    return;
-                }
-
-                auto pc = Helpers::GetPlayerController();
-                auto pm = Helpers::GetPlayerMovement();
-
-                if (pc.IsHorseRiding()) {
-                    if (!pc.GetWantsToGallop()) {
-                        pc.ToggleGallop();
-                    }
-                } else {
-                    if (!pm.IsSprinting() && pm.IsMovingOnGround()) {
-                        pc.ToggleSprint();
-                    }
-                }
-            });
-
-            hooks.Register(STR("/Script/Altar.VEnhancedAltarPlayerController:ShiftKeyInput_Released"), [this]() {
-                auto pc = Helpers::GetPlayerController();
-                pc.DisableSprintToggle();
-                pc.DisableGallopToggle();
-            });
-        }
     }
 
     /// Returns true if scrolling should currently control movement.
     bool IsControllingSpeed() {
         return !settings.holdToAdjust.get() || Helpers::IsKeyPressed(settings.holdKey.get()).value();
     }
-
-  private:
-    /// Returns true if the sprint key is currently pressed, false otherwise.
-    bool IsSprintKeyPressed() const {
-        return Helpers::IsInputActionKeyPressed(STR("IMC_Game_Movement"), STR("IA_Game_Movement_Sprint"));
-    }
 };
 
-#define MY_AWESOME_MOD_API __declspec(dllexport)
+#define DYNAMIC_MOVEMENT_WALK_SPEED_API __declspec(dllexport)
 extern "C" {
-    MY_AWESOME_MOD_API RC::CppUserModBase* start_mod() {
-        return new AdvancedMovement();
+    DYNAMIC_MOVEMENT_WALK_SPEED_API RC::CppUserModBase* start_mod() {
+        return new WalkSpeed();
     }
 
-    MY_AWESOME_MOD_API void uninstall_mod(RC::CppUserModBase* mod) {
+    DYNAMIC_MOVEMENT_WALK_SPEED_API void uninstall_mod(RC::CppUserModBase* mod) {
         delete mod;
     }
 }

@@ -54,7 +54,6 @@ class SettingsBase {
 
     template <typename T>
     Setting<T>& AddSetting(T defaultValue, std::string_view path) {
-        Logger::log(STR("ADDING\n"));
         auto* entry = new Setting<T>(defaultValue, path);
         entries.emplace_back(entry);
         return *entry;
@@ -93,8 +92,6 @@ class SettingsBase {
             return;
         }
 
-        Logger::log(STR("Reading\n"));
-        Logger::log(STR("Entries: {}\n"), entries.size());
         for (auto& entry : entries) {
             std::visit(
                 [table](auto* entry) {
@@ -106,7 +103,6 @@ class SettingsBase {
                         return;
                     }
                     if (auto value = node.value<ValueType>()) {
-                        Logger::log(STR("Set"));
                         entry->value = *value;
                     } else {
                         Logger::log<LogLevel::Warning>(STR("Invalid value found at: \"{}\"\n"),
@@ -118,6 +114,11 @@ class SettingsBase {
     }
 
     void readFromOverrideDirectory(const StringType& directoryPath) {
+        if (!(std::filesystem::exists(directoryPath) && std::filesystem::is_directory(directoryPath))) {
+            Logger::log<LogLevel::Normal>(STR("Config override directory not found. Skipping...\n"));
+            Logger::log<LogLevel::Normal>(STR("Path: {}\n"), to_wstring(directoryPath));
+            return;
+        }
         for (const auto& entry : std::filesystem::directory_iterator(directoryPath)) {
             if (entry.path().extension() == ".toml") {
                 auto filePath = entry.path().wstring();

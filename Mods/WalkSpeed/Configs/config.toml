@@ -5,7 +5,7 @@
 # ===============================================
 
 # When enabled, scrolling will only adjust run speed when `holdKey` is held.
-holdToAdjust = true
+holdToAdjust = false
 
 # The key that needs to be held to adjust movement speed.
 holdKey = "LeftAlt"

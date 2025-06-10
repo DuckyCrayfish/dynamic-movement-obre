@@ -1,0 +1,4 @@
+[settings]
+
+# Enables the "hold to sprint" feature.
+holdToSprint = true

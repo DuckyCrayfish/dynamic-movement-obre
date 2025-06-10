@@ -38,17 +38,5 @@ class Settings : public SettingsBase<bool, float, int, StringType> {
         readFromOverrideDirectory(overrideDirectory);
     }
 
-    Setting<bool>& holdToAdjust = AddSetting<bool>(false, "settings.holdToAdjust");
-    Setting<StringType>& holdKey = AddSetting<StringType>(STR("LeftAlt"), "settings.holdKey");
-    Setting<bool>& lockPOV = AddSetting<bool>(true, "settings.lockPOV");
-    Setting<int>& steps = AddSetting<int>(5, "settings.steps");
-    Setting<bool>& scrollTogglesSprintOff = AddSetting<bool>(true, "settings.scrollTogglesSprintOff");
-    Setting<bool>& resetSpeedOnRun = AddSetting<bool>(true, "settings.resetSpeedOnRun");
-    Setting<bool>& resetSpeedOnSprint = AddSetting<bool>(true, "settings.resetSpeedOnSprint");
-    Setting<float>& moveRunMultMin = AddSetting<float>(1.0f, "settings.moveRunMultMin");
-    Setting<float>& moveRunMultMax = AddSetting<float>(3.5f, "settings.moveRunMultMax");
-    Setting<float>& moveRunAthleticsMultMin = AddSetting<float>(0.0f, "settings.moveRunAthleticsMultMin");
-    Setting<float>& moveRunAthleticsMultMax = AddSetting<float>(0.75f, "settings.moveRunAthleticsMultMax");
-    Setting<float>& sneakSpeedMult = AddSetting<float>(0.6f, "settings.sneakSpeedMult");
     Setting<bool>& holdToSprint = AddSetting<bool>(true, "settings.holdToSprint");
 };
