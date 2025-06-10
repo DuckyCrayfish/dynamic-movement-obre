@@ -28,110 +28,120 @@
 using namespace Helpers;
 
 
+/**
+ * These variables correspond to run-speed multiplier variables that the game uses to calculate run
+ * speed. While these values are unchanging in vanilla, the values here are calibrated to match the
+ * standard walking pace. When the mod sets each corresponding variable to these values, walk speed
+ * and run speed are equivalent.
+ */
+namespace WalkSpeedEquivalents {
+    /**
+     * Walking speed equivalent for MoveRunMult.
+     * Game default: 3.5
+     */
+    inline constexpr float MOVE_RUN_MULT = 1;
+    /**
+     * Walking speed equivalent for MoveRunAthleticsMult.
+     * Game default: 0.75
+     */
+    inline constexpr float MOVE_RUN_ATHLETICS_MULT = 0;
+    /**
+     * Walking speed equivalent for MoveSneakRunMult.
+     * Game default: 0.6
+     */
+    inline constexpr float MOVE_SNEAK_RUN_MULT = 1;
+}
+
 class MovementController {
   protected:
     /// Mod settings.
     const Settings& settings;
-    /// The current run speed multiplier.
-    float moveRunMult_;
-    /// The current run speed athletics multiplier.
-    float moveRunAthleticsMult_;
+    /// The current speed, as a normalized linear scalar from 0 (walking) to 1 (running).
+    float speed = 1;
 
   private:
-    const float positiveStepScalar;
-    const float negativeStepScalar;
-    float calculateSpeedScalar(const float from, const float to) const {
-        return std::pow(to / from, 1.0f / settings.steps.get());
+    /// Multiplicative growth at each step.
+    const float speedStepGain;
+    /// Additive growth at each step.
+    const float speedStepBias;
+
+    static inline float getSpeedStepGain(float max, int steps) noexcept {
+        return std::pow(max, 1.0f / steps);
+    }
+
+    static inline float getSpeedStepBias(float max, float gain) noexcept {
+        return (WalkSpeedEquivalents::MOVE_RUN_MULT * (gain - 1.0f)) / (max - WalkSpeedEquivalents::MOVE_RUN_MULT);
     }
 
   public:
-    MovementController(const Settings& settings_)
-        : settings(settings_),
-          moveRunMult_(settings_.moveRunMultMax.get()),
-          moveRunAthleticsMult_(settings_.moveRunAthleticsMultMax.get()),
-          positiveStepScalar(calculateSpeedScalar(settings.moveRunMultMin.get(), settings.moveRunMultMax.get())),
-          negativeStepScalar(calculateSpeedScalar(settings.moveRunMultMax.get(), settings.moveRunMultMin.get())) {};
+    MovementController(const Settings& settings)
+        : settings(settings),
+          speedStepGain(getSpeedStepGain(settings.moveRunMultMax.get(), settings.steps.get())),
+          speedStepBias(getSpeedStepBias(settings.moveRunMultMax.get(), speedStepGain)) {};
 
     ~MovementController() = default;
 
-    /// Returns true if a and b are equal or nearly equal, false otherwise.
-    bool nearlyEqual(float a, float b, float epsilon = 1e-3f) const {
-        return std::fabs(a - b) < epsilon;
+    /// Clamps `f` between `min` and `max`. If `f` falls within `epsilon` of either bound, it snaps to that bound.
+    static constexpr inline float clampSnap(float f, float min, float max, float epsilon = 1e-3f) noexcept {
+        if (f <= min + epsilon) return min;
+        if (f >= max - epsilon) return max;
+        return f;
     }
 
     /// Performs a linear interpolation between a and b by t.
-    float lerp(float a, float b, float t) const {
+    static constexpr float lerp(float a, float b, float t) noexcept {
         return a + t * (b - a);
-    }
-
-    /// Performs an inverse linear interpolation between a and b by t.
-    float inverse_lerp(float a, float b, float t) const {
-        return (t - a) / (b - a);
-    }
-
-    /// Returns the inverse lerp of the given run speed multiplier between min and max, mapping it to [0, 1].
-    float getNormalizedSpeedFactor(float moveRunMult) const {
-        float value =
-            std::clamp(inverse_lerp(settings.moveRunMultMin.get(), settings.moveRunMultMax.get(), moveRunMult),
-                       0.0f,
-                       1.0f);
-        if (nearlyEqual(value, 0.0f)) {
-            return 0.0f;
-        } else if (nearlyEqual(value, 1.0f)) {
-            return 1.0f;
-        }
-        return value;
     }
 
     /// Increment the speed by one step.
     void incrementSpeed() {
-        float speedFactor = getNormalizedSpeedFactor(moveRunMult_ * positiveStepScalar);
-        moveRunMult_ = lerp(settings.moveRunMultMin.get(), settings.moveRunMultMax.get(), speedFactor);
-        moveRunAthleticsMult_ =
-            lerp(settings.moveRunAthleticsMultMin.get(), settings.moveRunAthleticsMultMax.get(), speedFactor);
-        applySpeed();
+        float newSpeed = std::fma(speedStepGain, speed, speedStepBias);
+        newSpeed = clampSnap(newSpeed, 0, 1);
+        applySpeed(newSpeed);
     }
 
     /// Decrement the speed by one step.
     void decrementSpeed() {
-        float speedFactor = getNormalizedSpeedFactor(moveRunMult_ * negativeStepScalar);
-        moveRunMult_ = lerp(settings.moveRunMultMin.get(), settings.moveRunMultMax.get(), speedFactor);
-        moveRunAthleticsMult_ =
-            lerp(settings.moveRunAthleticsMultMin.get(), settings.moveRunAthleticsMultMax.get(), speedFactor);
-        applySpeed();
+        float newSpeed = (speed - speedStepBias) / speedStepGain;
+        newSpeed = clampSnap(newSpeed, 0, 1);
+        applySpeed(newSpeed);
     }
 
     /// Set the speed to the minimum value.
     void applyMinSpeed() {
-        moveRunMult_ = settings.moveRunMultMin.get();
-        moveRunAthleticsMult_ = settings.moveRunAthleticsMultMin.get();
-        applySpeed();
+        applySpeed(0);
     }
 
     /// Set the speed to the maximum value.
     void applyMaxSpeed() {
-        moveRunMult_ = settings.moveRunMultMax.get();
-        moveRunAthleticsMult_ = settings.moveRunAthleticsMultMax.get();
-        applySpeed();
+        applySpeed(1);
     }
 
-    /// Apply the speed values currently stored in this instance to the player.
-    void applySpeed() const {
+    /// Applies a given speed value to the player.
+    void applySpeed(float speed) {
+        this->speed = speed;
         auto playerMovement = GetPlayerMovement();
-        float sneakSpeedFactor = inverse_lerp(1, settings.moveRunMultMax.get(), moveRunMult_);
-        float sneakSpeed = lerp(1, settings.sneakSpeedMult.get(), sneakSpeedFactor);
-        playerMovement.SetMemberInChain(STR("MoveRunMult"), moveRunMult_);
-        playerMovement.SetMemberInChain(STR("MoveRunAthleticsMult"), moveRunAthleticsMult_);
-        playerMovement.SetMemberInChain(STR("MoveSneakRunMult"), sneakSpeed);
+        namespace Walking = WalkSpeedEquivalents;
+        auto& s = settings;
+
+        // Returns the appropriate multiplier value for the current speed.
+        auto setMultValue = [&](const TCHAR* varName, float walkVal, float runVal) {
+            float val = lerp(walkVal, runVal, speed);
+            playerMovement.SetMemberInChain(varName, val);
+        };
+
+        setMultValue(STR("MoveRunMult"), Walking::MOVE_RUN_MULT, s.moveRunMultMax.get());
+        setMultValue(STR("MoveRunAthleticsMult"), Walking::MOVE_RUN_ATHLETICS_MULT, s.moveRunAthleticsMultMax.get());
+        setMultValue(STR("MoveSneakRunMult"), Walking::MOVE_SNEAK_RUN_MULT, s.sneakSpeedMult.get());
     }
 
     /// Returns true if the player's current run speed is at the maximum value.
-    bool isAtMaxSpeed() const {
-        return moveRunMult_ == settings.moveRunMultMax.get();
+    bool isAtMaxSpeed() const noexcept {
+        return speed == 1;
     }
 
     /// Returns true if the player's current run speed is at the minimum value.
-    bool isAtMinSpeed() const {
-        return moveRunMult_ == settings.moveRunMultMin.get();
+    bool isAtMinSpeed() const noexcept {
+        return speed == 0;
     }
 };
