@@ -39,17 +39,17 @@ namespace WalkSpeedEquivalents {
      * Walking speed equivalent for MoveRunMult.
      * Game default: 3.5
      */
-    inline constexpr float MOVE_RUN_MULT = 1;
+    inline constexpr float MoveRunMult = 1;
     /**
      * Walking speed equivalent for MoveRunAthleticsMult.
      * Game default: 0.75
      */
-    inline constexpr float MOVE_RUN_ATHLETICS_MULT = 0;
+    inline constexpr float MoveRunAthleticsMult = 0;
     /**
      * Walking speed equivalent for MoveSneakRunMult.
      * Game default: 0.6
      */
-    inline constexpr float MOVE_SNEAK_RUN_MULT = 1;
+    inline constexpr float MoveSneakRunMult = 1;
 }
 
 class MovementController {
@@ -70,14 +70,14 @@ class MovementController {
     }
 
     static inline float getSpeedStepBias(float max, float gain) noexcept {
-        return (WalkSpeedEquivalents::MOVE_RUN_MULT * (gain - 1.0f)) / (max - WalkSpeedEquivalents::MOVE_RUN_MULT);
+        return (WalkSpeedEquivalents::MoveRunMult * (gain - 1.0f)) / (max - WalkSpeedEquivalents::MoveRunMult);
     }
 
   public:
     MovementController(const Settings& settings)
         : settings(settings),
-          speedStepGain(getSpeedStepGain(settings.moveRunMultMax.get(), settings.steps.get())),
-          speedStepBias(getSpeedStepBias(settings.moveRunMultMax.get(), speedStepGain)) {};
+          speedStepGain(getSpeedStepGain(settings.MoveRunMult.get(), settings.Steps.get())),
+          speedStepBias(getSpeedStepBias(settings.MoveRunMult.get(), speedStepGain)) {};
 
     ~MovementController() = default;
 
@@ -119,10 +119,10 @@ class MovementController {
 
     /// Applies a given speed value to the player.
     void applySpeed(float speed) {
-        this->speed = speed;
-        auto playerMovement = GetPlayerMovement();
         namespace Walking = WalkSpeedEquivalents;
-        auto& s = settings;
+        auto playerMovement = GetPlayerMovement();
+
+        this->speed = speed;
 
         // Returns the appropriate multiplier value for the current speed.
         auto setMultValue = [&](const TCHAR* varName, float walkVal, float runVal) {
@@ -130,9 +130,9 @@ class MovementController {
             playerMovement.SetMemberInChain(varName, val);
         };
 
-        setMultValue(STR("MoveRunMult"), Walking::MOVE_RUN_MULT, s.moveRunMultMax.get());
-        setMultValue(STR("MoveRunAthleticsMult"), Walking::MOVE_RUN_ATHLETICS_MULT, s.moveRunAthleticsMultMax.get());
-        setMultValue(STR("MoveSneakRunMult"), Walking::MOVE_SNEAK_RUN_MULT, s.sneakSpeedMult.get());
+        setMultValue(STR("MoveRunMult"), Walking::MoveRunMult, settings.MoveRunMult.get());
+        setMultValue(STR("MoveRunAthleticsMult"), Walking::MoveRunAthleticsMult, settings.MoveRunAthleticsMult.get());
+        setMultValue(STR("MoveSneakRunMult"), Walking::MoveSneakRunMult, settings.MoveSneakRunMult.get());
     }
 
     /// Returns true if the player's current run speed is at the maximum value.

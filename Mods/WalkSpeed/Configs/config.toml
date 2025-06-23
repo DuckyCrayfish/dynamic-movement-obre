@@ -1,50 +1,58 @@
-[settings]
+# ================================================
+#                Common Settings
+# ================================================
 
-# ===============================================
-# ============== Common Settings ================
-# ===============================================
-
-# When enabled, scrolling will only adjust run speed when `holdKey` is held.
-holdToAdjust = false
+# When enabled, scrolling will only adjust run speed
+# when `holdKey` is held.
+HoldToAdjust = false
 
 # The key that needs to be held to adjust movement speed.
-holdKey = "LeftAlt"
-
-# Whether or not to lock the POV while movement speed is being adjusted.
-lockPOV = true
+HoldKey = "LeftAlt"
 
 # Scroll speed sensitivity. Controls how many scrolls it
 # takes to go between the minimum and maximum speed.
-steps = 5
+Steps = 5
+
+
+
+# ================================================
+#                     Other
+# ================================================
+
+# Whether or not to lock the POV while movement
+# speed is being adjusted.
+LockPOV = true
 
 # Whether or not decrementing the speed while
 # sprinting will toggle off sprinting.
-scrollTogglesSprintOff = true
+ScrollTogglesSprintOff = true
 
 # Resets the run speed to the maximum value when
 # manually switching from "walking" to "running".
-resetSpeedOnRun = true
+ResetSpeedOnRun = true
 
 # Resets the run speed to the maximum value on sprint.
-resetSpeedOnSprint = true
+ResetSpeedOnSprint = true
 
-# Enables the "hold to sprint" feature.
-holdToSprint = true
 
-# ============== Speed Modifiers =================
-# This mod works by adjusting the multipliers
-# associated with run speed between the minimum
-# maximum values listed below.
+
+# ================================================
+#                 Game Variables
+# ------------------------------------------------
+# Since this mod controls some of the game's
+# internal internal variables, they can no longer
+# be modified externally using commands or mods.
+# For that reason, I have exposed them here.
 # ================================================
 
 # Run speed multiplier.
-# A value of 1.0 is equivalent to walking.
-# Default value in game: 3.5
-moveRunMultMin = 1
-moveRunMultMax = 3.5
+# Game default: 3.5
+MoveRunMult = 3.5
 
 # Run speed athletics skill multiplier.
-# A value of 0.0 is equivalent to walking.
-# Default value in game: 0.75
-moveRunAthleticsMultMin = 0
-moveRunAthleticsMultMax = 0.75
+# Game default: 0.75
+MoveRunAthleticsMult = 0.75
+
+# Run speed run skill multiplier.
+# Game default: 0.6
+MoveSneakRunMult = 0.6

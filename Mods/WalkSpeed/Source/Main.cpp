@@ -85,12 +85,12 @@ class WalkSpeed : public RC::CppUserModBase {
                     }
                     mc.incrementSpeed();
                 } else {
-                    if (pm.IsSprinting() && settings.scrollTogglesSprintOff.get()) {
+                    if (pm.IsSprinting() && settings.ScrollTogglesSprintOff.get()) {
                         pc.ToggleSprint();
                         mc.applyMaxSpeed();
                     } else {
                         mc.decrementSpeed();
-                        if (!walking && mc.isAtMinSpeed() && settings.moveRunMultMin.get() == 1) {
+                        if (!walking && mc.isAtMinSpeed()) {
                             pc.ToggleWalk();
                         }
                     }
@@ -100,19 +100,19 @@ class WalkSpeed : public RC::CppUserModBase {
         hooks.Register(
             STR("/Script/Altar.VEnhancedAltarPlayerController:MouseWheelUpInput"),
             [this]() {
-                if (IsControllingSpeed() && settings.lockPOV.get()) {
+                if (IsControllingSpeed() && settings.LockPOV.get()) {
                     cameraController.lockPOV();
                 }
             },
             [this]() { cameraController.resetPOVLock(); });
 
 
-        if (settings.resetSpeedOnRun.get()) {
+        if (settings.ResetSpeedOnRun.get()) {
             hooks.Register(STR("/Script/Altar.VEnhancedAltarPlayerController:ToggleWalk"),
                            [this]() { mc.applyMaxSpeed(); });
         }
 
-        if (settings.resetSpeedOnSprint.get()) {
+        if (settings.ResetSpeedOnSprint.get()) {
             hooks.Register(STR("/Script/Altar.VEnhancedAltarPlayerController:ToggleSprint"),
                            [this]() { mc.applyMaxSpeed(); });
         }
@@ -120,7 +120,7 @@ class WalkSpeed : public RC::CppUserModBase {
 
     /// Returns true if scrolling should currently control movement.
     bool IsControllingSpeed() {
-        return !settings.holdToAdjust.get() || Helpers::IsKeyPressed(settings.holdKey.get()).value();
+        return !settings.HoldToAdjust.get() || Helpers::IsKeyPressed(settings.HoldKey.get()).value();
     }
 };
 
