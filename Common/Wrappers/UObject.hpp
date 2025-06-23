@@ -113,23 +113,28 @@ namespace Wrappers {
 
         template <typename R = void>
         R call(const UFunctionWrapper Function) const {
-            Detail::FProperty* ReturnProperty = Function.value()->GetReturnProperty();
-            if (!ReturnProperty) {
-                throw std::runtime_error("Unable to fetch return property");
-            }
-            void* Params = _malloca(Function.value()->GetParmsSize());
-            ReturnProperty->InitializeValue_InContainer(Params);
+            if constexpr (std::is_void_v<R>) {
+                void* Params = _malloca(Function.value()->GetParmsSize());
+                wrapped->ProcessEvent(Function.value(), Params);
+            } else {
+                Detail::FProperty* ReturnProperty = Function.value()->GetReturnProperty();
+                if (!ReturnProperty) {
+                    throw std::runtime_error("Unable to fetch return property");
+                }
+                void* Params = _malloca(Function.value()->GetParmsSize());
+                ReturnProperty->InitializeValue_InContainer(Params);
 
-            wrapped->ProcessEvent(Function.value(), Params);
-            void* ReturnContainer = ReturnProperty->ContainerPtrToValuePtr<void>(Params);
-            if (!ReturnContainer) {
-                throw std::runtime_error("Unable to get return property container");
+                wrapped->ProcessEvent(Function.value(), Params);
+                void* ReturnContainer = ReturnProperty->ContainerPtrToValuePtr<void>(Params);
+                if (!ReturnContainer) {
+                    throw std::runtime_error("Unable to get return property container");
+                }
+                R* value = ReturnProperty->ContainerPtrToValuePtr<R>(ReturnContainer);
+                if (value == nullptr) {
+                    throw std::runtime_error("Unable to get return value");
+                }
+                return *value;
             }
-            R* value = ReturnProperty->ContainerPtrToValuePtr<R>(ReturnContainer);
-            if (value == nullptr) {
-                throw std::runtime_error("Unable to get return value");
-            }
-            return *value;
         }
 
         template <typename R = void>
